@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Doji Strategy">
+    <meta name="theme-color" content="#1a202c">
+    
+    <!-- Custom App Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><rect width='180' height='180' fill='url(%23grad)' rx='40'/><path d='M40 120 L60 100 L80 110 L100 80 L120 90 L140 60' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='60' cy='100' r='5' fill='white'/><circle cx='80' cy='110' r='5' fill='white'/><circle cx='100' cy='80' r='5' fill='white'/><circle cx='120' cy='90' r='5' fill='white'/><circle cx='140' cy='60' r='5' fill='white'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><rect width='180' height='180' fill='url(%23grad)' rx='40'/><path d='M40 120 L60 100 L80 110 L100 80 L120 90 L140 60' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='60' cy='100' r='5' fill='white'/><circle cx='80' cy='110' r='5' fill='white'/><circle cx='100' cy='80' r='5' fill='white'/><circle cx='120' cy='90' r='5' fill='white'/><circle cx='140' cy='60' r='5' fill='white'/></svg>">
+    
+    <title>Doji Trading Strategy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.3em;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        
+        .info-text {
+            font-size: 1em;
+            color: #4a5568;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 18px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+        }
+        
+        .btn:active {
+            transform: scale(0.97);
+        }
+        
+        .btn-red {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+        }
+        
+        .btn-green {
+            background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
+            color: white;
+        }
+        
+        .btn-gray {
+            background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+            color: #2d3748;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .success-badge {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .result-box {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #10b981;
+        }
+        
+        .result-item {
+            margin: 12px 0;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        
+        .result-item strong {
+            color: #2d3748;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .entry-text {
+            color: #2c5282;
+        }
+        
+        .stop-text {
+            color: #c53030;
+        }
+        
+        .profit-text {
+            color: #059669;
+        }
+        
+        .back-btn {
+            margin-top: 20px;
+            background: #e2e8f0;
+            color: #2d3748;
+            padding: 12px;
+            font-size: 0.95em;
+        }
+        
+        .icon {
+            font-size: 1.4em;
+        }
+        
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #cbd5e0;
+        }
+        
+        .dot.active {
+            background: #10b981;
+        }
+        
+        .step-label {
+            text-align: center;
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 15px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #10b981;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+            color: #065f46;
+        }
+        
+        .success-rate-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #f59e0b;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+            color: #92400e;
+            font-size: 1em;
+        }
+        
+        .success-rate-box.high {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #10b981;
+            color: #065f46;
+        }
+        
+        .success-rate-box.medium {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        
+        .success-rate-box.low {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: #f87171;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Doji Trading Strategy</h1>
+    </div>
+    
+    <div class="container">
+        <div class="card" id="screen">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script>
+        let currentPath = [];
+        
+        const screens = {
+            start: {
+                dots: 0,
+                step: "Setup",
+                question: "Found a big upward move and a doji?",
+                info: "First, confirm you have:\n• A big upward move\n• A doji candle formed",
+                options: [
+                    { text: "✓ Yes, I have both", icon: "✓", action: "firstCandle" }
+                ]
+            },
+            
+            firstCandle: {
+                dots: 1,
+                step: "Step 1 of 2",
+                question: "What's the NEXT candle after the doji?",
+                options: [
+                    { text: "Red Candle", icon: "🔴", color: "red", action: "redPath" },
+                    { text: "Green Candle", icon: "🟢", color: "green", action: "greenPath" },
+                    { text: "Another Doji", icon: "⚪", color: "gray", action: "anotherDoji" }
+                ]
+            },
+            
+            anotherDoji: {
+                dots: 1,
+                step: "Waiting...",
+                question: "Keep waiting through dojis",
+                info: "Wait for the next candle that is either RED or GREEN (not another doji)",
+                options: [
+                    { text: "Now it's Red", icon: "🔴", color: "red", action: "redPath" },
+                    { text: "Now it's Green", icon: "🟢", color: "green", action: "greenPath" }
+                ]
+            },
+            
+            redPath: {
+                dots: 2,
+                step: "Step 2 of 2",
+                question: "Where is the 2nd lower low?",
+                info: "Find 1st low (red + green combo), then find 2nd lower low",
+                options: [
+                    { text: "Stays in middle area", icon: "✓", color: "red", action: "redMiddle", badge: "LIKELY" },
+                    { text: "Below original move's low", icon: "✗", color: "red", action: "redBelow", badge: "50/50" }
+                ]
+            },
+            
+            greenPath: {
+                dots: 2,
+                step: "Step 2 of 2",
+                question: "Where was the doji positioned?",
+                info: "Was the doji near the top or in the middle of the original move?",
+                options: [
+                    { text: "Near top of move", icon: "📍", color: "green", action: "greenTop", badge: "70%" },
+                    { text: "Middle (flag pattern)", icon: "🚩", color: "green", action: "greenMiddle", badge: "80%" }
+                ]
+            },
+            
+            redMiddle: {
+                dots: 3,
+                step: "Trade Setup",
+                question: "Your Trade Plan",
+                successRate: "LIKELY",
+                successClass: "high",
+                result: {
+                    entry: "Measure height of red candle from 2nd lower low. Enter when candle BODY beats that height.",
+                    stop: "20¢ below entry",
+                    profit: "Top of original move"
+                }
+            },
+            
+            redBelow: {
+                dots: 3,
+                step: "Trade Setup",
+                question: "Your Trade Plan",
+                successRate: "50/50 UNLIKELY",
+                successClass: "low",
+                result: {
+                    entry: "Measure height of red candle from 2nd lower low. Enter when candle BODY beats that height.",
+                    stop: "20¢ below entry",
+                    profit: "20¢ above entry (1:1 ratio)"
+                }
+            },
+            
+            greenTop: {
+                dots: 3,
+                step: "Trade Setup",
+                question: "Your Trade Plan",
+                successRate: "70% VERY LIKELY",
+                successClass: "high",
+                result: {
+                    entry: "Mark the top of the doji. Enter when next candle BODY breaks above doji height.",
+                    stop: "20¢ below entry",
+                    profit: "20¢ above entry (1:1 ratio)"
+                }
+            },
+            
+            greenMiddle: {
+                dots: 3,
+                step: "Trade Setup",
+                question: "Your Trade Plan",
+                successRate: "80% SHOULD WORK",
+                successClass: "high",
+                result: {
+                    entry: "Mark the top of the doji. Enter when next candle BODY breaks above doji height.",
+                    stop: "20¢ below entry",
+                    profit: "Top of original move"
+                }
+            }
+        };
+        
+        function showScreen(screenName) {
+            currentPath.push(screenName);
+            const screen = screens[screenName];
+            const container = document.getElementById('screen');
+            
+            let html = '';
+            
+            // Progress dots
+            if (screen.dots > 0) {
+                html += '<div class="progress-dots">';
+                for (let i = 0; i < 3; i++) {
+                    html += `<div class="dot ${i < screen.dots ? 'active' : ''}"></div>`;
+                }
+                html += '</div>';
+            }
+            
+            // Step label
+            html += `<div class="step-label">${screen.step}</div>`;
+            
+            // Question
+            html += `<div class="question">${screen.question}</div>`;
+            
+            // Success rate box (if exists)
+            if (screen.successRate) {
+                html += `<div class="success-rate-box ${screen.successClass}">
+                    ⭐ Success Rate: ${screen.successRate}
+                </div>`;
+            }
+            
+            // Info text
+            if (screen.info) {
+                html += `<div class="info-text">${screen.info.replace(/\n/g, '<br>')}</div>`;
+            }
+            
+            // Result or Options
+            if (screen.result) {
+                html += '<div class="result-box">';
+                html += `<div class="result-item entry-text">
+                    <strong>📍 ENTRY:</strong> ${screen.result.entry}
+                </div>`;
+                html += `<div class="result-item stop-text">
+                    <strong>⛔ STOP LOSS:</strong> ${screen.result.stop}
+                </div>`;
+                html += `<div class="result-item profit-text">
+                    <strong>🎯 TAKE PROFIT:</strong> ${screen.result.profit}
+                </div>`;
+                html += '</div>';
+                
+                html += '<div class="highlight-box">Good luck with your trade! 📊</div>';
+            } else {
+                html += '<div class="options">';
+                screen.options.forEach(option => {
+                    const colorClass = option.color ? `btn-${option.color}` : 'btn-primary';
+                    const badge = option.badge ? `<span class="success-badge">${option.badge}</span>` : '';
+                    html += `
+                        <button class="btn ${colorClass}" onclick="showScreen('${option.action}')">
+                            <span class="icon">${option.icon}</span>
+                            <span>${option.text}</span>
+                            ${badge}
+                        </button>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            // Back button
+            if (currentPath.length > 1) {
+                html += '<button class="btn back-btn" onclick="goBack()">← Back</button>';
+            }
+            
+            // Reset button on result screens
+            if (screen.result) {
+                html += '<button class="btn btn-primary" style="margin-top: 10px;" onclick="reset()">Start New Setup</button>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function goBack() {
+            currentPath.pop(); // Remove current
+            const previous = currentPath.pop(); // Get previous
+            showScreen(previous || 'start');
+        }
+        
+        function reset() {
+            currentPath = [];
+            showScreen('start');
+        }
+        
+        // Initialize
+        showScreen('start');
+    </script>
+</body>
+</html>
